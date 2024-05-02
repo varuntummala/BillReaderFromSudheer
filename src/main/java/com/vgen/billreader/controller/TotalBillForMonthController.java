@@ -45,7 +45,7 @@ public class TotalBillForMonthController {
 	            int year=Integer.parseInt( files.getOriginalFilename().substring(7, 11));
 	            int month=Integer.parseInt(files.getOriginalFilename().substring(11, 13));
 	            int x=1;
-	            if((year==2024)||((year==2023)&&(month>=4))) {
+	            if((year>=2024)||((year==2023)&&(month>=4))) {
 	            	x=2;
 	            }
 	            var MonthandYear=	totalBillForMonthServices.findbyMonthandYear(year, month);
@@ -84,7 +84,7 @@ public class TotalBillForMonthController {
 	                    }
 	            	}
 	            		
-	          String FileName= "/template.xlsx";
+	          String FileName= "../BillReader/template.xlsx";
 	            FileOutputStream outputStream = new FileOutputStream(FileName);
 	            
 	            workbook.write(outputStream);
