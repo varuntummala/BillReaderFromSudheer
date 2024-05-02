@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.stream.Stream;
+
 
 import com.vgen.billreader.dto.TotalBillForMonthdto;
 import com.vgen.billreader.services.TotalBillForMonthServices;
@@ -44,12 +44,15 @@ public class TotalBillForMonthController {
 	            PDDocument document = PDDocument.load(files.getInputStream());
 	            int year=Integer.parseInt( files.getOriginalFilename().substring(7, 11));
 	            int month=Integer.parseInt(files.getOriginalFilename().substring(11, 13));
-	            int x=1;
+			 	int x;
 	            if((year>=2024)||((year==2023)&&(month>=4))) {
 	            	x=2;
 	            }
-	            var MonthandYear=	totalBillForMonthServices.findbyMonthandYear(year, month);
-	            if (!(MonthandYear.isEmpty())) {
+				else {
+					x = 1;
+				}
+	            var MonthAndYear=	totalBillForMonthServices.findbyMonthAndYear(year, month);
+	            if (!(MonthAndYear.isEmpty())) {
 	            	document.close();
 					return ResponseEntity.status(HttpStatus.FOUND)
 							.body(String.format("File not Uploaded: %s", files.getOriginalFilename() + " files is  fond"));
@@ -68,7 +71,7 @@ public class TotalBillForMonthController {
 	            
 	            // Printing the text
 	            
-	            Stream<String> line=text.lines();
+
 	            		
 	            String[] data = text.split("\n+");
 	            
@@ -103,10 +106,10 @@ public class TotalBillForMonthController {
 				XSSFSheet sheet2 = workbook2.getSheetAt(index);
 				
 				int number=0;
-				int rowindex = 0;
+
 				sheet2.getLastRowNum();
 				while(phoneNumbers.length>number) {
-					for(rowindex=0;rowindex<sheet2.getLastRowNum()-1;rowindex++) {
+					for(int rowindex=0;rowindex<sheet2.getLastRowNum()-1;rowindex++) {
 						XSSFRow xrow=	sheet2.getRow(rowindex);
 						
 						for(int cellindex = 0;xrow.getLastCellNum()>cellindex;cellindex++) {
@@ -171,7 +174,11 @@ public class TotalBillForMonthController {
 				System.out.println("PDF content written to Excel successfully!");
 	           
 	        } catch (IOException e) {
-	            e.printStackTrace();
+
+			 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					 .body(String.format("User not Uploaded:Exception %s", ""));
+
+
 	        }
 	        
      
