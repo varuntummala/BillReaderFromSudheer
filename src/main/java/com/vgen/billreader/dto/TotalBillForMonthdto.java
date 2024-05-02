@@ -1,4 +1,4 @@
-package com.vgen.wemeat.dto;
+package com.vgen.billreader.dto;
 
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;

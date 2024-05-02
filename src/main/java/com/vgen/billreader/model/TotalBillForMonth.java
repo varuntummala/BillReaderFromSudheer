@@ -1,4 +1,4 @@
-package com.vgen.wemeat.model;
+package com.vgen.billreader.model;
 
 import java.sql.Date;
 

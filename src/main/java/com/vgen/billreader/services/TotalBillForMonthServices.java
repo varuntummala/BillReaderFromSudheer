@@ -1,14 +1,14 @@
-package com.vgen.wemeat.services;
+package com.vgen.billreader.services;
 
 import java.util.List;
 import java.util.Optional;
 
+import com.vgen.billreader.dto.TotalBillForMonthdto;
+import com.vgen.billreader.model.TotalBillForMonth;
+import com.vgen.billreader.repositrory.TotalBillForMonthRepositrory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.vgen.wemeat.dto.TotalBillForMonthdto;
-import com.vgen.wemeat.model.TotalBillForMonth;
-import com.vgen.wemeat.repositrory.TotalBillForMonthRepositrory;
 @Service
 public class TotalBillForMonthServices {
 	@Autowired
