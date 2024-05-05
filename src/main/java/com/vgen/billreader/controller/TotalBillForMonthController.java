@@ -86,10 +86,10 @@ public class TotalBillForMonthController {
 	                        cell.setCellValue(data2[j]);
 	                    }
 	            	}
-	            		
-	          String FileName= "../BillReader/template.xlsx";
+			 System.out.println("befor");
+	          String FileName= "template.xlsx";
 	            FileOutputStream outputStream = new FileOutputStream(FileName);
-	            
+			 System.out.println("ofter");
 	            workbook.write(outputStream);
 
 	            // Closing the workbook
@@ -99,7 +99,8 @@ public class TotalBillForMonthController {
 	            document.close();
 	            
 	            FileInputStream file = new FileInputStream(new File(FileName));
-				XSSFWorkbook workbook2 = new XSSFWorkbook(file);
+
+			 XSSFWorkbook workbook2 = new XSSFWorkbook(file);
 				
 				int index = workbook2.getSheetIndex("pdf content");
 
@@ -174,7 +175,7 @@ public class TotalBillForMonthController {
 				System.out.println("PDF content written to Excel successfully!");
 	           
 	        } catch (IOException e) {
-
+					e.getStackTrace();
 			 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					 .body(String.format("User not Uploaded:Exception %s", ""));
 
