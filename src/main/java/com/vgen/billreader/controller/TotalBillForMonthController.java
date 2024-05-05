@@ -41,6 +41,8 @@ public class TotalBillForMonthController {
     @PostMapping
 	public ResponseEntity<String> upload(@RequestParam("file") MultipartFile files) {
 		 try {
+
+
 	            PDDocument document = PDDocument.load(files.getInputStream());
 	            int year=Integer.parseInt( files.getOriginalFilename().substring(7, 11));
 	            int month=Integer.parseInt(files.getOriginalFilename().substring(11, 13));
@@ -86,10 +88,10 @@ public class TotalBillForMonthController {
 	                        cell.setCellValue(data2[j]);
 	                    }
 	            	}
-			 System.out.println("befor");
+
 	          String FileName= "template.xlsx";
 	            FileOutputStream outputStream = new FileOutputStream(FileName);
-			 System.out.println("ofter");
+
 	            workbook.write(outputStream);
 
 	            // Closing the workbook
