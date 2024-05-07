@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 import com.vgen.billreader.dto.TotalBillForMonthdto;
@@ -39,11 +42,15 @@ public class TotalBillForMonthController {
 			"803-792-2439","803-992-3317","803-992-3443",
 			"980-616-1500","803-203-9530","773-575-9355","615-487-3250","615-487-3250","803-693-2505"};
     @PostMapping
-	public ResponseEntity<String> upload(@RequestParam("file") MultipartFile files) {
+	public ResponseEntity<String> upload(@RequestParam("file") MultipartFile[] mfiles) {
+			String[]  filefoundnames=new String[mfiles.length];
+			String[] fileuploadednames=new String[mfiles.length];
+				int filefound=0;
+				int fileuploaded=0;
 		 try {
-
-
-	            PDDocument document = PDDocument.load(files.getInputStream());
+			 System.out.println(mfiles.length);
+			 for (MultipartFile files : mfiles) {
+				PDDocument document = PDDocument.load(files.getInputStream());
 	            int year=Integer.parseInt( files.getOriginalFilename().substring(7, 11));
 	            int month=Integer.parseInt(files.getOriginalFilename().substring(11, 13));
 			 	int x;
@@ -56,8 +63,10 @@ public class TotalBillForMonthController {
 	            var MonthAndYear=	totalBillForMonthServices.findbyMonthAndYear(year, month);
 	            if (!(MonthAndYear.isEmpty())) {
 	            	document.close();
-					return ResponseEntity.status(HttpStatus.FOUND)
-							.body(String.format("File not Uploaded: %s", files.getOriginalFilename() + " files is  fond"));
+
+					filefoundnames[filefound++]=files.getOriginalFilename();
+					continue;
+
 				}
 	           
 	            // Instantiate PDFTextStripper class
@@ -173,22 +182,36 @@ public class TotalBillForMonthController {
 					}
 				file.close();
 				workbook.close();
-				
-				System.out.println("PDF content written to Excel successfully!");
-	           
-	        } catch (IOException e) {
+				 fileuploadednames[fileuploaded++]=files.getOriginalFilename();
+				System.out.println("PDF content written to DB successfully "+files.getOriginalFilename());
+			 }
+		 } catch (IOException e) {
 					e.getStackTrace();
 			 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					 .body(String.format("User not Uploaded:Exception %s", ""));
 
 
 	        }
-	        
-     
-     
-    
+		String in="\n";
+		if(fileuploaded>0){
+
+			for(int i=fileuploaded-1;i>=0;i--) {
+				in += fileuploadednames[i] + "\n";
+			}
+			}
+     if(filefound>0){
+		 String out="\n";
+		 for(int i=filefound-1;i>=0;i--) {
+			 out+=filefoundnames[i]+"\n";
+		 }
+
+		 return ResponseEntity.status(HttpStatus.FOUND)
+		 		.body(String.format("File not Uploaded: %s" , out + " files is  fond \n\n"+"Files  Uploaded"+in));
+
+	 }
+
 		 return ResponseEntity.status(HttpStatus.OK)
-					.body(String.format("File  Uploaded: %s", files.getOriginalFilename() + " files is Ok"));
+					.body(String.format("Files  Uploaded: %s", in+ " files is Ok"));
 		
 		 
 		 
