@@ -1,12 +1,10 @@
 package com.vgen.billreader.controller;
 
-import java.io.File;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+
 
 
 import com.vgen.billreader.dto.TotalBillForMonthdto;
@@ -97,7 +95,7 @@ public class TotalBillForMonthController {
 	            // Retrieving text from PDF document
 	            String text = pdfStripper.getText(document);
 	            
-	            // Printing the text
+
 	            
 
 	            		
@@ -115,8 +113,8 @@ public class TotalBillForMonthController {
 	                    }
 	            	}
 
-	          String FileName= "template.xlsx";
-	            FileOutputStream outputStream = new FileOutputStream(FileName);
+
+	            FileOutputStream outputStream = new FileOutputStream("template.xlsx");
 
 	            workbook.write(outputStream);
 
@@ -126,7 +124,7 @@ public class TotalBillForMonthController {
 	            // Closing the document
 	            document.close();
 	            
-	            FileInputStream file = new FileInputStream(new File(FileName));
+	            FileInputStream file = new FileInputStream("template.xlsx");
 
 			 XSSFWorkbook workbook2 = new XSSFWorkbook(file);
 				
@@ -160,7 +158,7 @@ public class TotalBillForMonthController {
 											if (row.getCell(2).getCellTypeEnum()==CellType.STRING) {
 
 												monthName=row.getCell(2).getStringCellValue();
-												month=(Integer)months.get(monthName);
+												month=months.get(monthName);
 												System.out.println(month);
 											}
 											if (row.getCell(4).getCellTypeEnum()==CellType.STRING) {
@@ -176,7 +174,7 @@ public class TotalBillForMonthController {
 											if (row.getCell(6).getCellTypeEnum()==CellType.STRING) {
 
 												monthName=row.getCell(6).getStringCellValue();
-												month=(Integer)months.get(monthName);
+												month=months.get(monthName);
 												System.out.println(month);
 											}
 											if (row.getCell(8).getCellTypeEnum()==CellType.STRING) {
@@ -196,7 +194,7 @@ public class TotalBillForMonthController {
 										if (!(MonthAndYear.isEmpty())) {
 											document.close();
 
-											filefoundnames[filefound++]=files.getOriginalFilename();
+											filefoundnames[filefound++]=files.getOriginalFilename()+"\n";
 											continue Nextfile;
 
 										}
@@ -220,7 +218,7 @@ public class TotalBillForMonthController {
 									
 									if (row.getCell(2).getCellTypeEnum()==CellType.STRING) {
 										System.out.println(row.getCell(2).getStringCellValue());
-										if(!(row.getCell(2).getStringCellValue().substring(0,1).equals("$"))) {
+										if(row.getCell(2).getStringCellValue().charAt(0) != '$') {
 
 											row=	sheet2.getRow((rowindex)-1);
 											totalBillForMonthdto.Name=row.getCell(0).getStringCellValue()+" "+row.getCell(1).getStringCellValue();
@@ -261,7 +259,7 @@ public class TotalBillForMonthController {
 					}
 				file.close();
 				workbook.close();
-				 fileuploadednames[fileuploaded++]=files.getOriginalFilename();
+				 fileuploadednames[fileuploaded++]=files.getOriginalFilename()+"\n";
 				System.out.println("PDF content written to DB successfully "+files.getOriginalFilename());
 			 }
 		 } catch (IOException e) {
@@ -271,26 +269,26 @@ public class TotalBillForMonthController {
 
 
 	        }
-		String in="\n";
+		StringBuilder in=new StringBuilder();
 		if(fileuploaded>0){
 
 			for(int i=fileuploaded-1;i>=0;i--) {
-				in += fileuploadednames[i] + "\n";
+				in.append(fileuploadednames[i]);
 			}
 			}
      	if(filefound>0){
-		 String out="\n";
+		 StringBuilder out=new StringBuilder();
 		 for(int i=filefound-1;i>=0;i--) {
-			 out+=filefoundnames[i]+"\n";
+			 out.append(filefoundnames[i]);
 		 }
 
 		 return ResponseEntity.status(HttpStatus.FOUND)
-		 		.body(String.format("File not Uploaded: %s" ,filefound+ out + " files are  fond \n\n"+"Files  Uploaded "+fileuploaded+in));
+		 		.body(String.format("File not Uploaded: %s" ,out+ " files are  fond"+filefound+ "\n\n"+"Files Uploaded"+fileuploaded+in));
 
 	 }
 
 		 return ResponseEntity.status(HttpStatus.OK)
-					.body(String.format("Files  Uploaded: %s", in+ " files are Ok"));
+					.body(String.format("Files  Uploaded: %s", in+ " files are Ok"+fileuploaded));
 		
 		 
 		 
