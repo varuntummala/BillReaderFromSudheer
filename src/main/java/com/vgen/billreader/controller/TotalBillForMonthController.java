@@ -137,7 +137,9 @@ public class TotalBillForMonthController {
 				int number=0;
 
 				sheet2.getLastRowNum();
+
 				while(phoneNumbers.length>number) {
+
 					for(int rowindex=0;rowindex<sheet2.getLastRowNum()-1;rowindex++) {
 						XSSFRow xrow=	sheet2.getRow(rowindex);
 						
@@ -148,6 +150,7 @@ public class TotalBillForMonthController {
 								if(number==phoneNumbers.length) {
 									break ;
 								}
+
 								if(xcell.getStringCellValue().equals(phoneNumbers[number])) {
 									if(phoneNumbers[number].equals("325191128-00001")) {
 
@@ -155,13 +158,13 @@ public class TotalBillForMonthController {
 										if(cellindex==2) {
 											XSSFRow row=	sheet2.getRow((rowindex-1));
 											if (row.getCell(2).getCellTypeEnum()==CellType.STRING) {
-												System.out.print(row.getCell(2).getStringCellValue()+" ");
+
 												monthName=row.getCell(2).getStringCellValue();
 												month=(Integer)months.get(monthName);
 												System.out.println(month);
 											}
 											if (row.getCell(4).getCellTypeEnum()==CellType.STRING) {
-												System.out.print(row.getCell(4).getStringCellValue()+" ");
+
 												year=Integer.parseInt(row.getCell(4).getStringCellValue());
 												System.out.println(year);
 											}
@@ -171,13 +174,13 @@ public class TotalBillForMonthController {
 										else  {
 											XSSFRow row=	sheet2.getRow((rowindex));
 											if (row.getCell(6).getCellTypeEnum()==CellType.STRING) {
-												System.out.print(row.getCell(6).getStringCellValue()+" ");
+
 												monthName=row.getCell(6).getStringCellValue();
 												month=(Integer)months.get(monthName);
 												System.out.println(month);
 											}
 											if (row.getCell(8).getCellTypeEnum()==CellType.STRING) {
-												System.out.print(row.getCell(8).getStringCellValue()+" ");
+
 												year=Integer.parseInt(row.getCell(8).getStringCellValue());
 												System.out.println(year);
 											}
@@ -217,7 +220,15 @@ public class TotalBillForMonthController {
 									
 									if (row.getCell(2).getCellTypeEnum()==CellType.STRING) {
 										System.out.println(row.getCell(2).getStringCellValue());
-										totalBillForMonthdto.BillAmount=row.getCell(2).getStringCellValue();
+										if(!(row.getCell(2).getStringCellValue().substring(0,1).equals("$"))) {
+
+											row=	sheet2.getRow((rowindex)-1);
+											totalBillForMonthdto.Name=row.getCell(0).getStringCellValue()+" "+row.getCell(1).getStringCellValue();
+
+										}
+
+											totalBillForMonthdto.BillAmount = row.getCell(2).getStringCellValue();
+
 									}
 									}
 									else {
