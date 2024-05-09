@@ -19,7 +19,6 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,74 +33,42 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/tv/bill")
 @Slf4j
 public class TotalBillForMonthController {
-	@Autowired
-	private TotalBillForMonthServices totalBillForMonthServices;
 
+	private final TotalBillForMonthServices totalBillForMonthServices;
 
+	TotalBillForMonthController(TotalBillForMonthServices totalBillForMonthServices){
+		this.totalBillForMonthServices=totalBillForMonthServices;
+	}
 
 	String[]phoneNumbers= {"325191128-00001","201-702-3929","330-501-4669","469-617-1147","803-693-2543",
 			"803-792-2439","803-992-3317","803-992-3443",
 			"980-616-1500","803-203-9530","773-575-9355","615-487-3250","615-487-3250","803-693-2505"};
     @PostMapping
-	public ResponseEntity<String> upload(@RequestParam("file") MultipartFile[] multifiles) {
+	public ResponseEntity<String> upload(@RequestParam("file") MultipartFile[] multipartfiles) {
 		String monthName;
-		HashMap<String, Integer> months =new HashMap<>(24,200);
-		months.put("January", 1);
-		months.put("Jan", 1);
-		months.put("Feb", 2);
-		months.put("February", 2);
-		months.put("Mar", 3);
-		months.put("March", 3);
-		months.put("Apr", 4);
-		months.put("April", 4);
-		months.put("May", 5);
-		months.put("June", 6);
-		months.put("Jun", 6);
-		months.put("July", 7);
-		months.put("Jul", 7);
-		months.put("August", 8);
-		months.put("Aug", 8);
-		months.put("September", 9);
-		months.put("Sep", 9);
-		months.put("October", 10);
-		months.put("Oct", 10);
-		months.put("November", 11);
-		months.put("Nov", 11);
-		months.put("December", 12);
-		months.put("Dec", 12);
-			String[]  filefoundnames=new String[multifiles.length];
-			String[] fileuploadednames=new String[multifiles.length];
+		int year=0;
+		int month=0;
+		int x=1;
+
+		HashMap<String, Integer> months = getHashMap();
+		String[]  filefoundnames=new String[multipartfiles.length];
+			String[] fileuploadednames=new String[multipartfiles.length];
 				int filefound=0;
 				int fileuploaded=0;
 		 try {
-			 System.out.println(multifiles.length);
+			 System.out.println(multipartfiles.length);
 			 Nextfile:
-			 for (MultipartFile files : multifiles) {
+			 for (MultipartFile files : multipartfiles) {
 				PDDocument document = PDDocument.load(files.getInputStream());
-	            int year=0;
-	            int month=0;
-			 	int x=1;
-
-
-	           
 	            // Instantiate PDFTextStripper class
 	            PDFTextStripper pdfStripper = new PDFTextStripper();
 	            for(int i=document.getNumberOfPages()-1;i>12;i--) {
 	            	document.removePage(i);
 	            }
-	            
 	            System.out.println(document.getNumberOfPages());
-	            
-	            // Retrieving text from PDF document
 	            String text = pdfStripper.getText(document);
-	            
 
-	            
-
-	            		
-	            String[] data = text.split("\n+");
-	            
-
+				String[] data = text.split("\n+");
 	            XSSFWorkbook workbook = new XSSFWorkbook();
 	            XSSFSheet sheet = workbook.createSheet("pdf content");
 	            for(int i=0;i<data.length;i++) {
@@ -112,26 +79,14 @@ public class TotalBillForMonthController {
 	                        cell.setCellValue(data2[j]);
 	                    }
 	            	}
-
-
 	            FileOutputStream outputStream = new FileOutputStream("template.xlsx");
-
 	            workbook.write(outputStream);
-
-	            // Closing the workbook
 	            workbook.close();
-
-	            // Closing the document
 	            document.close();
-	            
 	            FileInputStream file = new FileInputStream("template.xlsx");
-
-			 XSSFWorkbook workbook2 = new XSSFWorkbook(file);
-				
+				XSSFWorkbook workbook2 = new XSSFWorkbook(file);
 				int index = workbook2.getSheetIndex("pdf content");
-
 				XSSFSheet sheet2 = workbook2.getSheetAt(index);
-				
 				int number=0;
 
 				sheet2.getLastRowNum();
@@ -140,7 +95,7 @@ public class TotalBillForMonthController {
 
 					for(int rowindex=0;rowindex<sheet2.getLastRowNum()-1;rowindex++) {
 						XSSFRow xrow=	sheet2.getRow(rowindex);
-						
+
 						for(int cellindex = 0;xrow.getLastCellNum()>cellindex;cellindex++) {
 							XSSFCell xcell=xrow.getCell(cellindex);
 
@@ -204,18 +159,18 @@ public class TotalBillForMonthController {
 
 									XSSFRow row=	sheet2.getRow((rowindex)-x);
 									TotalBillForMonthdto totalBillForMonthdto=new TotalBillForMonthdto();
-									
+
 									if (row.getCell(0).getCellTypeEnum()==CellType.STRING) {
-										
+
 										System.out.print(row.getCell(0).getStringCellValue()+" ");
 									}
-									
+
 									if (row.getCell(1).getCellTypeEnum()==CellType.STRING) {
 										System.out.println(row.getCell(1).getStringCellValue());
 										totalBillForMonthdto.Name=row.getCell(0).getStringCellValue()+" "+row.getCell(1).getStringCellValue();
 									}
 									if(x==2) {
-									
+
 									if (row.getCell(2).getCellTypeEnum()==CellType.STRING) {
 										System.out.println(row.getCell(2).getStringCellValue());
 										if(row.getCell(2).getStringCellValue().charAt(0) != '$') {
@@ -236,26 +191,19 @@ public class TotalBillForMonthController {
 											totalBillForMonthdto.BillAmount=row.getCell(0).getStringCellValue();
 										}
 									}
-									totalBillForMonthdto.mobileNumber=phoneNumbers[number];	
+									totalBillForMonthdto.mobileNumber=phoneNumbers[number];
 									totalBillForMonthdto.month=month;
 									totalBillForMonthdto.Year=year;
 									totalBillForMonthServices.save(totalBillForMonthdto);
 									number=number+1;
-									
-									
-									
 								}
-								
-								
-							} 
-							
+							}
 						}
-						
 					}
 					if(number<phoneNumbers.length) {
 						number=number+1;
 					}
-					
+
 					}
 				file.close();
 				workbook.close();
@@ -283,14 +231,42 @@ public class TotalBillForMonthController {
 		 }
 
 		 return ResponseEntity.status(HttpStatus.FOUND)
-		 		.body(String.format("File not Uploaded: %s" ,out+ " files are  fond"+filefound+ "\n\n"+"Files Uploaded"+fileuploaded+in));
+		 		.body(String.format("File not Uploaded: %s" ,out+ " files are  fond "+filefound+ "\n\n"+"Files Uploaded "+fileuploaded+in));
 
 	 }
 
 		 return ResponseEntity.status(HttpStatus.OK)
-					.body(String.format("Files  Uploaded: %s", in+ " files are Ok"+fileuploaded));
-		
-		 
-		 
+					.body(String.format("Files  Uploaded: %s", in+ " files are Ok "+fileuploaded));
+
+
+
 	 }
+
+	private static HashMap<String, Integer> getHashMap() {
+		HashMap<String, Integer> months =new HashMap<>(24,200);
+		months.put("January", 1);
+		months.put("Jan", 1);
+		months.put("Feb", 2);
+		months.put("February", 2);
+		months.put("Mar", 3);
+		months.put("March", 3);
+		months.put("Apr", 4);
+		months.put("April", 4);
+		months.put("May", 5);
+		months.put("June", 6);
+		months.put("Jun", 6);
+		months.put("July", 7);
+		months.put("Jul", 7);
+		months.put("August", 8);
+		months.put("Aug", 8);
+		months.put("September", 9);
+		months.put("Sep", 9);
+		months.put("October", 10);
+		months.put("Oct", 10);
+		months.put("November", 11);
+		months.put("Nov", 11);
+		months.put("December", 12);
+		months.put("Dec", 12);
+		return months;
+	}
 }
