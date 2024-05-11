@@ -26,5 +26,5 @@ public class TotalBillForMonth {
 
 	private int year;
 
-	private String BillAmount;
+	private double BillAmount;
 }

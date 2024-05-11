@@ -41,7 +41,7 @@ public class TotalBillForMonthController {
 	}
 
 	String[]phoneNumbers= {"325191128-00001","201-702-3929","330-501-4669","469-617-1147","773-575-9355","803-693-2543",
-			"803-792-2439","803-992-3317","803-992-3443","803-203-9530","469-617-1147","980-616-1500","615-487-3250","615-487-3250","803-693-2505"};
+			"803-792-2439","803-992-3317","803-992-3443","803-203-9530","980-616-1500","615-487-3250","803-693-2505"};
     @PostMapping
 	public ResponseEntity<String> upload(@RequestParam("file") MultipartFile[] multipartfiles) {
 		String monthName;
@@ -91,7 +91,7 @@ public class TotalBillForMonthController {
 				sheet2.getLastRowNum();
 
 				while(phoneNumbers.length>number) {
-
+				int	nextnumber=0;
 					for(int rowindex=0;rowindex<sheet2.getLastRowNum()-1;rowindex++) {
 						XSSFRow xrow=	sheet2.getRow(rowindex);
 
@@ -170,41 +170,51 @@ public class TotalBillForMonthController {
 
 									if (row.getCell(1).getCellTypeEnum()==CellType.STRING) {
 										System.out.println(row.getCell(1).getStringCellValue());
-										totalBillForMonthdto.Name=row.getCell(0).getStringCellValue()+" "+row.getCell(1).getStringCellValue();
+										totalBillForMonthdto.name=row.getCell(0).getStringCellValue()+" "+row.getCell(1).getStringCellValue();
 									}
 									if(x==2) {
 
 									if (row.getCell(2).getCellTypeEnum()==CellType.STRING) {
-										System.out.println(row.getCell(2).getStringCellValue());
-										if(row.getCell(2).getStringCellValue().charAt(0) != '$') {
+
+										if (row.getCell(2).getStringCellValue().charAt(0) != '$') {
 											if (row.getCell(2).getStringCellValue().charAt(0) != '-') {
 												row = sheet2.getRow((rowindex) - 1);
-												totalBillForMonthdto.Name = row.getCell(0).getStringCellValue() + " " + row.getCell(1).getStringCellValue();
+												totalBillForMonthdto.name = row.getCell(0).getStringCellValue() + " " + row.getCell(1).getStringCellValue();
+												totalBillForMonthdto.billAmount = Double.parseDouble(row.getCell(2).getStringCellValue().replace("$", ""));
+											} else {
+												totalBillForMonthdto.billAmount = Double.parseDouble(row.getCell(2).getStringCellValue().replace("-$", "-"));
+												System.out.println(totalBillForMonthdto.billAmount);
 											}
+										} else {
+											totalBillForMonthdto.billAmount = Double.parseDouble(row.getCell(2).getStringCellValue().replace("$", ""));
+											System.out.println(totalBillForMonthdto.billAmount);
+
 										}
-
-											totalBillForMonthdto.BillAmount = row.getCell(2).getStringCellValue();
-
 									}
 									}
 									else {
 										row=	sheet2.getRow((rowindex)+1);
 										if (row.getCell(0).getCellTypeEnum()==CellType.STRING) {
-											System.out.println(row.getCell(0).getStringCellValue());
-											totalBillForMonthdto.BillAmount=row.getCell(0).getStringCellValue();
+
+											totalBillForMonthdto.billAmount=Double.parseDouble(row.getCell(0).getStringCellValue().replace("$",""));
+											System.out.println(totalBillForMonthdto.billAmount);
 										}
 									}
 									totalBillForMonthdto.mobileNumber=phoneNumbers[number];
 									totalBillForMonthdto.month=month;
-									totalBillForMonthdto.Year=year;
+									totalBillForMonthdto.year=year;
 									totalBillForMonthServices.save(totalBillForMonthdto);
 									number=number+1;
-								}
+									nextnumber=2;									}
 							}
 						}
+
 					}
 					if(number<phoneNumbers.length) {
-						number=number+1;
+						if(nextnumber==0){
+							number=number+1;
+						}
+
 					}
 
 				}

@@ -16,12 +16,12 @@ public class TotalBillForMonthServices {
 	
 	public void save(TotalBillForMonthdto totalBillForMonthdto) {
 		TotalBillForMonth totalBillForMonth=new TotalBillForMonth();
-		totalBillForMonth.setBillAmount(totalBillForMonthdto.BillAmount);
+		totalBillForMonth.setBillAmount(totalBillForMonthdto.billAmount);
 		totalBillForMonth.setMobileNumber(totalBillForMonthdto.mobileNumber);
 		
 		totalBillForMonth.setMonth(totalBillForMonthdto.month);
-		totalBillForMonth.setName(totalBillForMonthdto.Name);
-		totalBillForMonth.setYear(totalBillForMonthdto.Year);
+		totalBillForMonth.setName(totalBillForMonthdto.name);
+		totalBillForMonth.setYear(totalBillForMonthdto.year);
 		totalBillForMonthRepositrory.save(totalBillForMonth);
 	}
 	

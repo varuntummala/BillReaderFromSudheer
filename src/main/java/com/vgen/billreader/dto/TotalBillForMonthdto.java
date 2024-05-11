@@ -11,12 +11,12 @@ public class TotalBillForMonthdto {
 	
 	public  String mobileNumber;
 	
-	public String Name;
+	public String name;
 
 	public int month;
 	
-	public int Year;
+	public int year;
 	
-	public String BillAmount;
+	public double billAmount;
 
 }
