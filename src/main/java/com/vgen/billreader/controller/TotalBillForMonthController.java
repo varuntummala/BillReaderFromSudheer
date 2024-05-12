@@ -1,6 +1,7 @@
 package com.vgen.billreader.controller;
 
 
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -8,6 +9,9 @@ import java.io.IOException;
 
 
 import com.vgen.billreader.dto.TotalBillForMonthdto;
+
+
+import com.vgen.billreader.model.TotalBillForMonth;
 import com.vgen.billreader.services.TotalBillForMonthServices;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -19,15 +23,23 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Optional;
+
 import lombok.extern.slf4j.Slf4j;
+
 
 @RestController
 @RequestMapping("/tv/bill")
@@ -35,14 +47,109 @@ import lombok.extern.slf4j.Slf4j;
 public class TotalBillForMonthController {
 
 	private final TotalBillForMonthServices totalBillForMonthServices;
+	private static final Logger LOGGER = LoggerFactory.getLogger(TotalBillForMonthController.class);
 
 	TotalBillForMonthController(TotalBillForMonthServices totalBillForMonthServices){
 		this.totalBillForMonthServices=totalBillForMonthServices;
 	}
 
-	String[]phoneNumbers= {"325191128-00001","201-702-3929","330-501-4669","469-617-1147","773-575-9355","803-693-2543",
+	String[] phoneNumbers= {"325191128-00001","201-702-3929","330-501-4669","469-617-1147","773-575-9355","803-693-2543",
 			"803-792-2439","803-992-3317","803-992-3443","803-203-9530","980-616-1500","615-487-3250","803-693-2505"};
-    @PostMapping
+	double[] totalAmount=new double[phoneNumbers.length];
+	@GetMapping("/data")
+	public ResponseEntity<?> getBills() {
+		Resource totalBillFile=null;
+		HashMap<Integer,String> monthName=getMonth();
+
+
+		long count=1L;
+
+		try {
+			Optional<TotalBillForMonth> dataMonth= totalBillForMonthServices.findById(count);
+			if(dataMonth.isEmpty()){
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No data found");
+
+			}
+
+			var totalBillForMonth=dataMonth.get();
+			int year=totalBillForMonth.getYear();
+			int month=totalBillForMonth.getMonth();
+
+
+			XSSFWorkbook workbook = new XSSFWorkbook();
+
+			XSSFSheet sheet = workbook.createSheet("Bill content");
+			for (int rowcont = 0;; rowcont++) {
+				Row row = sheet.createRow(rowcont);
+
+					var listBillForMonth = totalBillForMonthServices.findbyMonthAndYear(year, month);
+					if(rowcont>0) {
+						count = listBillForMonth.size() + count;
+					}
+				for (int cellcont = 0; cellcont < phoneNumbers.length; cellcont++) {
+					if(rowcont==0) {
+						Cell cell = row.createCell(cellcont);
+						cell.setCellValue(phoneNumbers[cellcont]);
+					}
+					else if(cellcont==0) {
+						Cell cell = row.createCell(cellcont);
+						cell.setCellValue(monthName.get(month)+"-"+year);
+					}
+					else {
+						String phoneNumber = phoneNumbers[cellcont];
+						Cell cell = row.createCell(cellcont);
+						LOGGER.info("phone number: {}", phoneNumber);
+						var dataOfAmanut = listBillForMonth.stream()
+								.filter((e) -> e.getMobileNumber().equals(phoneNumber)).findFirst();
+							if(dataOfAmanut.isEmpty()){
+								LOGGER.info("No data found");
+								cell.setCellValue(0);
+							}
+							else{
+                                LOGGER.info("{}", dataOfAmanut.get().getBillAmount());
+								cell.setCellValue(dataOfAmanut.get().getBillAmount());
+								totalAmount[cellcont]+=dataOfAmanut.get().getBillAmount();
+							}
+						}
+
+					}
+				dataMonth= totalBillForMonthServices.findById(count);
+				if(dataMonth.isEmpty()){
+					rowcont+=3;
+					row = sheet.createRow(rowcont);
+					for (int cellcont = 0; cellcont < phoneNumbers.length; cellcont++){
+						Cell cell = row.createCell(cellcont);
+						if(cellcont==0){
+							cell.setCellValue("Total Amount");
+						}
+							else {
+							cell.setCellValue(totalAmount[cellcont]);
+						}
+					}
+
+						break;
+				}
+				totalBillForMonth=dataMonth.get();
+				year=totalBillForMonth.getYear();
+				month=totalBillForMonth.getMonth();
+				}
+
+			FileOutputStream outputStream = new FileOutputStream("BillAmount.xlsx");
+			workbook.write(outputStream);
+			Path path= Paths.get("BillAmount.xlsx");
+			 totalBillFile= new UrlResource(path.toUri());
+
+
+			workbook.close();
+
+		}catch (IOException e) {
+			e.getStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(totalBillFile);
+		}
+		return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,"BillAmount.xlsx").body(totalBillFile);
+	}
+	@PostMapping
 	public ResponseEntity<String> upload(@RequestParam("file") MultipartFile[] multipartfiles) {
 		String monthName;
 		int year=0;
@@ -55,7 +162,7 @@ public class TotalBillForMonthController {
 				int filefound=0;
 				int fileuploaded=0;
 		 try {
-			 System.out.println(multipartfiles.length);
+			 LOGGER.info("Number of files {} ",multipartfiles.length);
 			 Nextfile:
 			 for (MultipartFile files : multipartfiles) {
 				PDDocument document = PDDocument.load(files.getInputStream());
@@ -64,7 +171,7 @@ public class TotalBillForMonthController {
 	            for(int i=document.getNumberOfPages()-1;i>12;i--) {
 	            	document.removePage(i);
 	            }
-	            System.out.println(document.getNumberOfPages());
+				 LOGGER.info("Number of pages {} ",document.getNumberOfPages());
 	            String text = pdfStripper.getText(document);
 
 				String[] data = text.split("\n+");
@@ -87,11 +194,8 @@ public class TotalBillForMonthController {
 				int index = workbook2.getSheetIndex("pdf content");
 				XSSFSheet sheet2 = workbook2.getSheetAt(index);
 				int number=0;
-
-				sheet2.getLastRowNum();
-
 				while(phoneNumbers.length>number) {
-				int	nextnumber=0;
+					boolean nextnumber=false;
 					for(int rowindex=0;rowindex<sheet2.getLastRowNum()-1;rowindex++) {
 						XSSFRow xrow=	sheet2.getRow(rowindex);
 
@@ -110,19 +214,19 @@ public class TotalBillForMonthController {
 								if(xcell.getStringCellValue().equals(phoneNumbers[number])) {
 									if(phoneNumbers[number].equals("325191128-00001")) {
 
-										System.out.println(phoneNumbers[number]);
+										LOGGER.info(phoneNumbers[number]);
 										if(cellindex==2) {
 											XSSFRow row=	sheet2.getRow((rowindex-1));
 											if (row.getCell(2).getCellTypeEnum()==CellType.STRING) {
 
 												monthName=row.getCell(2).getStringCellValue();
 												month=months.get(monthName);
-												System.out.println(month);
+
 											}
 											if (row.getCell(4).getCellTypeEnum()==CellType.STRING) {
 
 												year=Integer.parseInt(row.getCell(4).getStringCellValue());
-												System.out.println(year);
+
 											}
 
 
@@ -133,12 +237,12 @@ public class TotalBillForMonthController {
 
 												monthName=row.getCell(6).getStringCellValue();
 												month=months.get(monthName);
-												System.out.println(month);
+
 											}
 											if (row.getCell(8).getCellTypeEnum()==CellType.STRING) {
 
 												year=Integer.parseInt(row.getCell(8).getStringCellValue());
-												System.out.println(year);
+
 											}
 										}
 										if((year>=2024)||((year==2023)&&(month>=4))) {
@@ -148,14 +252,16 @@ public class TotalBillForMonthController {
 											x = 1;
 										}
 										number++;
-										var MonthAndYear=	totalBillForMonthServices.findbyMonthAndYear(year, month);
-										if (!(MonthAndYear.isEmpty())) {
+										var monthAndYear=	totalBillForMonthServices.findbyMonthAndYear(year, month);
+										if (!(monthAndYear.isEmpty())) {
 											document.close();
 
 											filefoundnames[filefound++]="\n"+files.getOriginalFilename();
 											continue Nextfile;
 
 										}
+										LOGGER.info("Year {}",year);
+										LOGGER.info("Month {} ",month);
 										continue;
 									}
 
@@ -165,11 +271,11 @@ public class TotalBillForMonthController {
 
 									if (row.getCell(0).getCellTypeEnum()==CellType.STRING) {
 
-										System.out.print(row.getCell(0).getStringCellValue()+" ");
+										LOGGER.info(row.getCell(0).getStringCellValue());
 									}
 
 									if (row.getCell(1).getCellTypeEnum()==CellType.STRING) {
-										System.out.println(row.getCell(1).getStringCellValue());
+										LOGGER.info(row.getCell(1).getStringCellValue());
 										totalBillForMonthdto.name=row.getCell(0).getStringCellValue()+" "+row.getCell(1).getStringCellValue();
 									}
 									if(x==2) {
@@ -183,11 +289,11 @@ public class TotalBillForMonthController {
 												totalBillForMonthdto.billAmount = Double.parseDouble(row.getCell(2).getStringCellValue().replace("$", ""));
 											} else {
 												totalBillForMonthdto.billAmount = Double.parseDouble(row.getCell(2).getStringCellValue().replace("-$", "-"));
-												System.out.println(totalBillForMonthdto.billAmount);
+
 											}
 										} else {
 											totalBillForMonthdto.billAmount = Double.parseDouble(row.getCell(2).getStringCellValue().replace("$", ""));
-											System.out.println(totalBillForMonthdto.billAmount);
+
 
 										}
 									}
@@ -197,21 +303,23 @@ public class TotalBillForMonthController {
 										if (row.getCell(0).getCellTypeEnum()==CellType.STRING) {
 
 											totalBillForMonthdto.billAmount=Double.parseDouble(row.getCell(0).getStringCellValue().replace("$",""));
-											System.out.println(totalBillForMonthdto.billAmount);
+
 										}
 									}
+
+									LOGGER.info("Amount {} ",totalBillForMonthdto.billAmount);
 									totalBillForMonthdto.mobileNumber=phoneNumbers[number];
 									totalBillForMonthdto.month=month;
 									totalBillForMonthdto.year=year;
 									totalBillForMonthServices.save(totalBillForMonthdto);
 									number=number+1;
-									nextnumber=2;									}
+									nextnumber=true;									}
 							}
 						}
 
 					}
 					if(number<phoneNumbers.length) {
-						if(nextnumber==0){
+						if(!nextnumber){
 							number=number+1;
 						}
 
@@ -221,7 +329,7 @@ public class TotalBillForMonthController {
 				file.close();
 				workbook.close();
 				 fileuploadednames[fileuploaded++]="\n"+files.getOriginalFilename();
-				System.out.println("PDF content written to DB successfully "+files.getOriginalFilename());
+				 LOGGER.debug("PDF content written to DB successfully {} ",files.getOriginalFilename());
 			 }
 		 } catch (IOException e) {
 					e.getStackTrace();
@@ -282,4 +390,33 @@ public class TotalBillForMonthController {
 		months.put("Dec", 12);
 		return months;
 	}
+	private static HashMap<Integer,String> getMonth() {
+		HashMap<Integer,String> months =new HashMap<>(12,12);
+		months.put(1,"January");
+
+
+		months.put(2,"February");
+
+		months.put(3,"March");
+
+		months.put(4,"April");
+		months.put(5,"May");
+		months.put(6,"June");
+
+		months.put(7,"July");
+
+		months.put(8,"August");
+
+		months.put(9,"September");
+
+		months.put(10,"October");
+
+		months.put(11,"November");
+
+		months.put(12,"December");
+
+		return months;
+	}
+
+
 }

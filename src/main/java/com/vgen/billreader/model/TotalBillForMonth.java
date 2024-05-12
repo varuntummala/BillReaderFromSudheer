@@ -20,11 +20,11 @@ public class TotalBillForMonth {
 
 	private String mobileNumber;
 
-	private String Name;
+	private String name;
 
 	private int month;
 
 	private int year;
 
-	private double BillAmount;
+	private double billAmount;
 }

@@ -14,5 +14,6 @@ public interface TotalBillForMonthRepositrory extends JpaRepository<TotalBillFor
 	
 	@Query("FROM TotalBillForMonth WHERE year=?1 AND month=?2")
 	List<TotalBillForMonth> findByYearAndMonth(int year, int month);
+
 	
 }

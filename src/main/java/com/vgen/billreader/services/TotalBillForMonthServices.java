@@ -1,6 +1,7 @@
 package com.vgen.billreader.services;
 
 import java.util.List;
+import java.util.Optional;
 
 
 import com.vgen.billreader.dto.TotalBillForMonthdto;
@@ -24,7 +25,13 @@ public class TotalBillForMonthServices {
 		totalBillForMonth.setYear(totalBillForMonthdto.year);
 		totalBillForMonthRepositrory.save(totalBillForMonth);
 	}
-	
+	public Optional<TotalBillForMonth> findById(Long id) {
+
+
+	return totalBillForMonthRepositrory.findById(id);
+	}
+
+
 	public List<TotalBillForMonth> findbyMonthAndYear(int year,int month){
 		
 		return totalBillForMonthRepositrory.findByYearAndMonth(year, month);
