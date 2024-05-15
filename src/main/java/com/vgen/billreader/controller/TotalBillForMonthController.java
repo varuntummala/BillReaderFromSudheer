@@ -202,7 +202,7 @@ public class TotalBillForMonthController {
 						for(int cellindex = 0;xrow.getLastCellNum()>cellindex;cellindex++) {
 							XSSFCell xcell=xrow.getCell(cellindex);
 
-							if (xcell.getCellTypeEnum() == CellType.STRING) {
+							if (xcell.getCellType() == CellType.STRING) {
 								if(number==phoneNumbers.length) {
 									break ;
 								}
@@ -217,13 +217,13 @@ public class TotalBillForMonthController {
 										LOGGER.info(phoneNumbers[number]);
 										if(cellindex==2) {
 											XSSFRow row=	sheet2.getRow((rowindex-1));
-											if (row.getCell(2).getCellTypeEnum()==CellType.STRING) {
+											if (row.getCell(2).getCellType()==CellType.STRING) {
 
 												monthName=row.getCell(2).getStringCellValue();
 												month=months.get(monthName);
 
 											}
-											if (row.getCell(4).getCellTypeEnum()==CellType.STRING) {
+											if (row.getCell(4).getCellType()==CellType.STRING) {
 
 												year=Integer.parseInt(row.getCell(4).getStringCellValue());
 
@@ -233,13 +233,13 @@ public class TotalBillForMonthController {
 										}
 										else  {
 											XSSFRow row=	sheet2.getRow((rowindex));
-											if (row.getCell(6).getCellTypeEnum()==CellType.STRING) {
+											if (row.getCell(6).getCellType()==CellType.STRING) {
 
 												monthName=row.getCell(6).getStringCellValue();
 												month=months.get(monthName);
 
 											}
-											if (row.getCell(8).getCellTypeEnum()==CellType.STRING) {
+											if (row.getCell(8).getCellType()==CellType.STRING) {
 
 												year=Integer.parseInt(row.getCell(8).getStringCellValue());
 
@@ -269,18 +269,18 @@ public class TotalBillForMonthController {
 									XSSFRow row=	sheet2.getRow((rowindex)-x);
 									TotalBillForMonthdto totalBillForMonthdto=new TotalBillForMonthdto();
 
-									if (row.getCell(0).getCellTypeEnum()==CellType.STRING) {
+									if (row.getCell(0).getCellType()==CellType.STRING) {
 
 										LOGGER.info(row.getCell(0).getStringCellValue());
 									}
 
-									if (row.getCell(1).getCellTypeEnum()==CellType.STRING) {
+									if (row.getCell(1).getCellType()==CellType.STRING) {
 										LOGGER.info(row.getCell(1).getStringCellValue());
 										totalBillForMonthdto.name=row.getCell(0).getStringCellValue()+" "+row.getCell(1).getStringCellValue();
 									}
 									if(x==2) {
 
-									if (row.getCell(2).getCellTypeEnum()==CellType.STRING) {
+									if (row.getCell(2).getCellType()==CellType.STRING) {
 
 										if (row.getCell(2).getStringCellValue().charAt(0) != '$') {
 											if (row.getCell(2).getStringCellValue().charAt(0) != '-') {
@@ -300,7 +300,7 @@ public class TotalBillForMonthController {
 									}
 									else {
 										row=	sheet2.getRow((rowindex)+1);
-										if (row.getCell(0).getCellTypeEnum()==CellType.STRING) {
+										if (row.getCell(0).getCellType()==CellType.STRING) {
 
 											totalBillForMonthdto.billAmount=Double.parseDouble(row.getCell(0).getStringCellValue().replace("$",""));
 

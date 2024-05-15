@@ -7,13 +7,16 @@ import java.util.Optional;
 import com.vgen.billreader.dto.TotalBillForMonthdto;
 import com.vgen.billreader.model.TotalBillForMonth;
 import com.vgen.billreader.repositrory.TotalBillForMonthRepositrory;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Service;
 
 @Service
 public class TotalBillForMonthServices {
-	@Autowired
-	private TotalBillForMonthRepositrory totalBillForMonthRepositrory;
+
+	private final  TotalBillForMonthRepositrory totalBillForMonthRepositrory;
+	TotalBillForMonthServices(TotalBillForMonthRepositrory totalBillForMonthRepositrory){
+		this.totalBillForMonthRepositrory=totalBillForMonthRepositrory;
+	}
 	
 	public void save(TotalBillForMonthdto totalBillForMonthdto) {
 		TotalBillForMonth totalBillForMonth=new TotalBillForMonth();
