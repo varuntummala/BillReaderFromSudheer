@@ -180,7 +180,7 @@ public class TotalBillForMonthController {
 				 //FileInputStream fileInputStream = new FileInputStream("BillAmount.pdf");
 				 //document=PDDocument.load(fileInputStream.readAllBytes());
 	            String text = pdfStripper.getText(document);
-				 //LOGGER.info("Number of text {} ",text);
+				 LOGGER.info("Number of text {} ",text);
 
 				String[] data = text.split("\n+");
 	            XSSFWorkbook workbook = new XSSFWorkbook();
