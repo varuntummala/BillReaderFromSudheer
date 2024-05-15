@@ -2,6 +2,7 @@ package com.vgen.billreader.controller;
 
 
 
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -55,9 +56,10 @@ public class TotalBillForMonthController {
 
 	String[] phoneNumbers= {"325191128-00001","201-702-3929","330-501-4669","469-617-1147","773-575-9355","803-693-2543",
 			"803-792-2439","803-992-3317","803-992-3443","803-203-9530","980-616-1500","615-487-3250","803-693-2505"};
-	double[] totalAmount=new double[phoneNumbers.length];
+
 	@GetMapping("/data")
 	public ResponseEntity<?> getBills() {
+		double[] totalAmount=new double[phoneNumbers.length];
 		Resource totalBillFile=null;
 		HashMap<Integer,String> monthName=getMonth();
 
@@ -167,16 +169,22 @@ public class TotalBillForMonthController {
 			 for (MultipartFile files : multipartfiles) {
 				PDDocument document = PDDocument.load(files.getInputStream());
 	            // Instantiate PDFTextStripper class
+				 LOGGER.info("document of files {} ",document);
 	            PDFTextStripper pdfStripper = new PDFTextStripper();
 	            for(int i=document.getNumberOfPages()-1;i>12;i--) {
 	            	document.removePage(i);
 	            }
 				 LOGGER.info("Number of pages {} ",document.getNumberOfPages());
+				 //document.save("BillAmount.pdf");
+				 //FileInputStream fileInputStream = new FileInputStream("BillAmount.pdf");
+				 //document=PDDocument.load(fileInputStream.readAllBytes());
 	            String text = pdfStripper.getText(document);
+				 //LOGGER.info("Number of text {} ",text);
 
 				String[] data = text.split("\n+");
 	            XSSFWorkbook workbook = new XSSFWorkbook();
 	            XSSFSheet sheet = workbook.createSheet("pdf content");
+
 	            for(int i=0;i<data.length;i++) {
 	            Row row = sheet.createRow(i);
 	            		String[] data2=	data[i].split("\\s+");
@@ -185,16 +193,26 @@ public class TotalBillForMonthController {
 	                        cell.setCellValue(data2[j]);
 	                    }
 	            	}
-	            FileOutputStream outputStream = new FileOutputStream("template.xlsx");
+
+	            FileOutputStream outputStream = new FileOutputStream("Data/template1.xlsx");
 	            workbook.write(outputStream);
-	            workbook.close();
+
+
 	            document.close();
-	            FileInputStream file = new FileInputStream("template.xlsx");
+				// workbook.close();
+	            FileInputStream file = new FileInputStream("Data/template1.xlsx");
+
 				XSSFWorkbook workbook2 = new XSSFWorkbook(file);
+
 				int index = workbook2.getSheetIndex("pdf content");
+
 				XSSFSheet sheet2 = workbook2.getSheetAt(index);
+
 				int number=0;
+
+
 				while(phoneNumbers.length>number) {
+
 					boolean nextnumber=false;
 					for(int rowindex=0;rowindex<sheet2.getLastRowNum()-1;rowindex++) {
 						XSSFRow xrow=	sheet2.getRow(rowindex);
@@ -202,7 +220,7 @@ public class TotalBillForMonthController {
 						for(int cellindex = 0;xrow.getLastCellNum()>cellindex;cellindex++) {
 							XSSFCell xcell=xrow.getCell(cellindex);
 
-							if (xcell.getCellType() == CellType.STRING) {
+							if (xcell.getCellTypeEnum() == CellType.STRING) {
 								if(number==phoneNumbers.length) {
 									break ;
 								}
@@ -217,13 +235,13 @@ public class TotalBillForMonthController {
 										LOGGER.info(phoneNumbers[number]);
 										if(cellindex==2) {
 											XSSFRow row=	sheet2.getRow((rowindex-1));
-											if (row.getCell(2).getCellType()==CellType.STRING) {
+											if (row.getCell(2).getCellTypeEnum()==CellType.STRING) {
 
 												monthName=row.getCell(2).getStringCellValue();
 												month=months.get(monthName);
 
 											}
-											if (row.getCell(4).getCellType()==CellType.STRING) {
+											if (row.getCell(4).getCellTypeEnum()==CellType.STRING) {
 
 												year=Integer.parseInt(row.getCell(4).getStringCellValue());
 
@@ -233,13 +251,13 @@ public class TotalBillForMonthController {
 										}
 										else  {
 											XSSFRow row=	sheet2.getRow((rowindex));
-											if (row.getCell(6).getCellType()==CellType.STRING) {
+											if (row.getCell(6).getCellTypeEnum()==CellType.STRING) {
 
 												monthName=row.getCell(6).getStringCellValue();
 												month=months.get(monthName);
 
 											}
-											if (row.getCell(8).getCellType()==CellType.STRING) {
+											if (row.getCell(8).getCellTypeEnum()==CellType.STRING) {
 
 												year=Integer.parseInt(row.getCell(8).getStringCellValue());
 
@@ -269,18 +287,18 @@ public class TotalBillForMonthController {
 									XSSFRow row=	sheet2.getRow((rowindex)-x);
 									TotalBillForMonthdto totalBillForMonthdto=new TotalBillForMonthdto();
 
-									if (row.getCell(0).getCellType()==CellType.STRING) {
+									if (row.getCell(0).getCellTypeEnum()==CellType.STRING) {
 
 										LOGGER.info(row.getCell(0).getStringCellValue());
 									}
 
-									if (row.getCell(1).getCellType()==CellType.STRING) {
+									if (row.getCell(1).getCellTypeEnum()==CellType.STRING) {
 										LOGGER.info(row.getCell(1).getStringCellValue());
 										totalBillForMonthdto.name=row.getCell(0).getStringCellValue()+" "+row.getCell(1).getStringCellValue();
 									}
 									if(x==2) {
 
-									if (row.getCell(2).getCellType()==CellType.STRING) {
+									if (row.getCell(2).getCellTypeEnum()==CellType.STRING) {
 
 										if (row.getCell(2).getStringCellValue().charAt(0) != '$') {
 											if (row.getCell(2).getStringCellValue().charAt(0) != '-') {
@@ -300,7 +318,7 @@ public class TotalBillForMonthController {
 									}
 									else {
 										row=	sheet2.getRow((rowindex)+1);
-										if (row.getCell(0).getCellType()==CellType.STRING) {
+										if (row.getCell(0).getCellTypeEnum()==CellType.STRING) {
 
 											totalBillForMonthdto.billAmount=Double.parseDouble(row.getCell(0).getStringCellValue().replace("$",""));
 

@@ -1,6 +1,0 @@
-com\vgen\billreader\Application.class
-com\vgen\billreader\controller\TotalBillForMonthController.class
-com\vgen\billreader\repositrory\TotalBillForMonthRepositrory.class
-com\vgen\billreader\dto\TotalBillForMonthdto.class
-com\vgen\billreader\services\TotalBillForMonthServices.class
-com\vgen\billreader\model\TotalBillForMonth.class
