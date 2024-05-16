@@ -30,6 +30,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -105,11 +106,11 @@ public class TotalBillForMonthController {
 						var dataOfAmanut = listBillForMonth.stream()
 								.filter((e) -> e.getMobileNumber().equals(phoneNumber)).findFirst();
 							if(dataOfAmanut.isEmpty()){
-								LOGGER.info("No data found");
+
 								cell.setCellValue(0);
 							}
 							else{
-                                LOGGER.info("{}", dataOfAmanut.get().getBillAmount());
+
 								cell.setCellValue(dataOfAmanut.get().getBillAmount());
 								totalAmount[cellcont]+=dataOfAmanut.get().getBillAmount();
 							}
@@ -150,7 +151,9 @@ public class TotalBillForMonthController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body(totalBillFile);
 		}
-		return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,"BillAmount.xlsx").body(totalBillFile);
+		String headervalue="attachment; filename=\"" + totalBillFile.getFilename() + "\"";
+		String contentType="application/octet-stream";
+		return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType)).header(HttpHeaders.CONTENT_DISPOSITION,headervalue).body(totalBillFile);
 	}
 	@PostMapping
 	public ResponseEntity<String> upload(@RequestParam("file") MultipartFile[] multipartfiles) {
@@ -176,9 +179,7 @@ public class TotalBillForMonthController {
 	            	document.removePage(i);
 	            }
 				 LOGGER.info("Number of pages {} ",document.getNumberOfPages());
-				 //document.save("BillAmount.pdf");
-				 //FileInputStream fileInputStream = new FileInputStream("BillAmount.pdf");
-				 //document=PDDocument.load(fileInputStream.readAllBytes());
+
 	            String text = pdfStripper.getText(document);
 				 LOGGER.info("Number of text {} ",text);
 
