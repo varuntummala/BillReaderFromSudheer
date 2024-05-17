@@ -102,7 +102,7 @@ public class TotalBillForMonthController {
 					else {
 						String phoneNumber = phoneNumbers[cellcont];
 						Cell cell = row.createCell(cellcont);
-						LOGGER.info("phone number: {}", phoneNumber);
+
 						var dataOfAmanut = listBillForMonth.stream()
 								.filter((e) -> e.getMobileNumber().equals(phoneNumber)).findFirst();
 							if(dataOfAmanut.isEmpty()){
@@ -173,7 +173,7 @@ public class TotalBillForMonthController {
 			 for (MultipartFile files : multipartfiles) {
 				PDDocument document = PDDocument.load(files.getInputStream());
 	            // Instantiate PDFTextStripper class
-				 LOGGER.info("document of files {} ",document);
+
 	            PDFTextStripper pdfStripper = new PDFTextStripper();
 	            for(int i=document.getNumberOfPages()-1;i>12;i--) {
 	            	document.removePage(i);
@@ -181,7 +181,7 @@ public class TotalBillForMonthController {
 				 LOGGER.info("Number of pages {} ",document.getNumberOfPages());
 
 	            String text = pdfStripper.getText(document);
-				 LOGGER.info("Number of text {} ",text);
+
 
 				String[] data = text.split("\n+");
 	            XSSFWorkbook workbook = new XSSFWorkbook();
@@ -196,13 +196,13 @@ public class TotalBillForMonthController {
 	                    }
 	            	}
 
-	            FileOutputStream outputStream = new FileOutputStream("Data/template1.xlsx");
+	            FileOutputStream outputStream = new FileOutputStream("template1.xlsx");
 	            workbook.write(outputStream);
 
 
 	            document.close();
 				// workbook.close();
-	            FileInputStream file = new FileInputStream("Data/template1.xlsx");
+	            FileInputStream file = new FileInputStream("template1.xlsx");
 
 				XSSFWorkbook workbook2 = new XSSFWorkbook(file);
 
